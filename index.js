@@ -268,3 +268,152 @@ const caesarsCipher3 = (str, number) => {
                 return str[index] === str[index].toUpperCase() ? acum += char.toUpperCase() : acum += char
         }, '')
 }
+
+/* Task 20 (перевірка чи є рядки анаграмами) */
+const isAnagram1 = (str1, str2) => {
+    if (typeof str1 !== 'string' || typeof str2 !== 'string') return 'Incorrect data'
+    if (str1.length !== str2.length) return false
+    while (str1.length) {
+        if (str2.includes(str1[0])) {
+            str2 = str2.replace(str1[0], '')
+            str1 = str1.slice(1)
+        } else {
+            return false
+        }
+    }
+    return true
+}
+
+/* Task 21 (створити об'єкт УНІВЕРСИТЕТ) */
+const university = {
+    students: [],
+    idGenerator: function() {
+        return "_id" + Math.random().toString(16).slice(2)
+    },
+    findByID: function(id) {
+        for(let i = 0 ; i < this.students.length ; i++) {
+            if (this.students[i].id === id) 
+                return { index: i, student: this.students[i]}
+        }
+    },
+    createStudent: function(name, cource, faculty) {
+        const id = this.idGenerator()
+        const student = {
+            id: id,
+            name: name,
+            cource: cource,
+            faculty: faculty
+        }
+        this.students.push(student)
+        console.log(`CREATE: student: ${name}, id: ${id}`)
+        return this
+    },
+    deleteStudent: function(id) {
+        const student = this.findByID(id)
+        this.students.splice(student.index, 1)
+        console.log(`DELETE: student: ${student.student.name}, id: ${id}`)
+        return this
+    },
+    getStudentsByCource: function(cource) {
+        return this.students.reduce((acum, item) => {
+            if (item.cource === cource) acum.push(item)
+            return acum
+        }, [])
+    },
+    getStudentsByFaculty: function(faculty) {
+        return this.students.reduce((acum, item) => {
+            if (item.faculty === faculty) acum.push(item)
+            return acum
+        }, [])
+    },
+    getSingleStudent: function(id) {
+        return this.findByID(id).student
+    },
+    getAllStudents: function() {
+        return [...this.students]
+    }  
+}
+
+/* Task 22 (аналыз тексту) */
+const textAnalysis1 = str => {
+    if (typeof str !== 'string') return 'Incorrect data'
+    const basicStr = str.trim().toLowerCase()
+    const statistics = {
+        symbolCounter: 0,
+        wordCounter: 0,
+        sentenceCounter: 0,
+        words: {
+            value: [],
+            length: 0
+        },
+        unique: {}
+    }
+    const charsArray = [",", ".", "!", "?", " "]
+    let curentWord = ''
+    for (let i = 0 ; i < basicStr.length ; i++) {
+        let char = basicStr[i]
+        if (basicStr[i + 1]) {
+            if (!charsArray.includes(char)) {
+                curentWord += char
+                statistics.symbolCounter ++
+            } else {
+                if (curentWord) {
+                    let length = curentWord.length
+                    if (length === statistics.words.length) {
+                        statistics.words.value.push(curentWord);
+                    }
+                    if (length > statistics.words.length) {
+                        statistics.words.length = length;
+                        statistics.words.value = [];
+                        statistics.words.value.push(curentWord);
+                        
+                    } 
+                    statistics.unique[curentWord] = (statistics.unique[curentWord] || 0) + 1;
+                    statistics.wordCounter++
+                    curentWord = ''
+                }
+                if (char === '.' || char === '?' || char === '!') statistics.sentenceCounter++
+            }
+        } else {
+            if (!charsArray.includes(char)) {
+                curentWord += char
+                statistics.symbolCounter ++
+            } 
+            let length = curentWord.length
+            if (length === statistics.words.length) {
+                statistics.words.value.push(curentWord);
+            }
+            if (length > statistics.words.length) {
+                statistics.words.length = length;
+                statistics.words.value = [];
+                statistics.words.value.push(curentWord);
+                
+            } 
+            statistics.unique[curentWord] = (statistics.unique[curentWord] || 0) + 1;
+            statistics.wordCounter++
+            statistics.sentenceCounter++
+        }    
+    }
+    let mostPopularWords = []
+    let  mostPopularAmount = 0
+    for (const key in statistics.unique) {
+        if (statistics.unique[key] === mostPopularAmount) {
+            mostPopularWords.push(key)
+        }
+        if (statistics.unique[key] > mostPopularAmount) {
+            mostPopularWords = []
+            mostPopularWords.push(key)
+            mostPopularAmount = statistics.unique[key]
+        }
+    }
+    return {
+        "String": str,
+        "Amount of symbols": statistics.symbolCounter,
+        "Amount of words": statistics.wordCounter,
+        "Amount of sentences": statistics.sentenceCounter,
+        "Most popular words": mostPopularWords,
+        "Amount of popular words (each)": mostPopularAmount,
+        "Longest words": statistics.words.value,
+        "Amoun of symbols in the longest words (each)": statistics.words.length
+    }
+}
